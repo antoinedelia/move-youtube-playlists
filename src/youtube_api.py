@@ -35,7 +35,7 @@ class Youtube_Api:
         :return: The id of the Youtube playlist
         :rtype: str
         """
-        request = self.client.playlists().list(part="snippet")
+        request = self.client.playlists().list(part="snippet", mine=True)
         try:
             response = request.execute()
             playlists = response["items"]
