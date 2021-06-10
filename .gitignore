@@ -1,3 +1,5 @@
 .vscode/
 client_secret.json
 playlists/
+.pytest_cache/
+__pycache__

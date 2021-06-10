@@ -2,7 +2,7 @@ import json
 from dataclasses import dataclass
 from typing import List
 from pathlib import Path
-from youtube_api import Youtube_Api
+from src.youtube_api import Youtube_Api
 import pandas as pd
 
 PLAYLISTS_CSV_DIRECTORY_PATH = "./playlists/"
@@ -16,7 +16,7 @@ class File:
     path: str = None
 
 
-def get_csv_files_from_dir(directory_path: str) -> List[File]:
+def get_files_from_dir(directory_path: str) -> List[File]:
     from os import listdir
     from os.path import isfile, join
     files = [File(Path(f).stem, f, directory_path + f) for f in listdir(directory_path) if isfile(join(directory_path, f))]
@@ -27,7 +27,7 @@ def main():
     youtube = Youtube_Api()
     youtube.init_youtube_client(CLIENT_SECRETS_FILE)
 
-    files = get_csv_files_from_dir(PLAYLISTS_CSV_DIRECTORY_PATH)
+    files = get_files_from_dir(PLAYLISTS_CSV_DIRECTORY_PATH)
 
     for file in files:
         playlist_name = file.name
