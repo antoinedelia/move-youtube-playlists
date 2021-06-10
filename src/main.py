@@ -17,6 +17,13 @@ class File:
 
 
 def get_files_from_dir(directory_path: str) -> List[File]:
+    """Get all files from a directory
+
+    :param directory_path: The path of the directory
+    :type directory_path: str
+    :return: A list of files found in the directory
+    :rtype: List[File]
+    """
     from os import listdir
     from os.path import isfile, join
     files = [File(Path(f).stem, f, directory_path + f) for f in listdir(directory_path) if isfile(join(directory_path, f))]
