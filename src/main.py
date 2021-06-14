@@ -8,6 +8,7 @@ import pandas as pd
 cwd = os.getcwd()
 PLAYLISTS_CSV_DIRECTORY_PATH = f"{cwd}/playlists/"
 CLIENT_SECRETS_FILE = f"{cwd}/client_secret.json"
+REPORT_FILE = "report.json"
 
 
 @dataclass
@@ -57,9 +58,19 @@ def main():
         dataframe = pd.read_csv(file.path)
         videos = json.loads(dataframe.to_json(orient='records'))
 
+        responses = []
         for video in videos:
             video_id = video["Video Id"]
-            youtube.add_video_to_playlist(playlist_id, video_id)
+            response = youtube.add_video_to_playlist(playlist_id, video_id)
+            responses.add(response)
+
+        number_of_failures = len([response for response in responses if response["status"] == "Failure"])
+        number_of_success = len(responses) - number_of_failures
+        print(f"There have been {number_of_success}/{len(responses)} success responses.")
+        if number_of_failures > 0:
+            print(f"You can view a detailed report of what errors occured in the report file {REPORT_FILE}.")
+            with open('data.json', 'w', encoding='utf-8') as f:
+                json.dump(responses, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":

@@ -98,7 +98,7 @@ class Youtube_Api:
             print(f"Could not create playlist {playlist_name} with error: {e}")
             return None
 
-    def add_video_to_playlist(self, playlist_id: str, video_id: str, position: int = 99999) -> None:
+    def add_video_to_playlist(self, playlist_id: str, video_id: str, position: int = 99999) -> dict:
         """Add a Youtube video to a Youtube playlist
 
         :param new_playlist_id: The id of the playlist
@@ -107,6 +107,8 @@ class Youtube_Api:
         :type video_id: str
         :param position: The position in which the video should be placed in the playlist, defaults to 99999
         :type position: int, optional
+        :return: Object representing the status of the request
+        :rtype: dict
         """
         request = self.client.playlistItems().insert(
             part="snippet",
@@ -126,5 +128,16 @@ class Youtube_Api:
             response = request.execute()
             video_title = response["snippet"]["title"]
             print(f"Successully added video with id {video_id}. The video was: {video_title}")
+            return {
+                "video_id": video_id,
+                "video_tile": video_title,
+                "status": "Success"
+            }
         except googleapiclient.errors.HttpError as e:
             print(f"Could not move video with id {video_id} with error: {e}")
+            return {
+                "video_id": video_id,
+                "video_tile": None,
+                "status": "Failure",
+                "error_message": e
+            }
