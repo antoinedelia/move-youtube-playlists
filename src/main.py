@@ -69,7 +69,7 @@ def main():
         print(f"There have been {number_of_success}/{len(responses)} success responses.")
         if number_of_failures > 0:
             print(f"You can view a detailed report of what errors occured in the report file {REPORT_FILE}.")
-            with open('data.json', 'w', encoding='utf-8') as f:
+            with open(REPORT_FILE, 'w', encoding='utf-8') as f:
                 json.dump(responses, f, ensure_ascii=False, indent=4)
 
 
