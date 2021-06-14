@@ -39,7 +39,7 @@ def main():
 
     files = get_files_from_dir(PLAYLISTS_CSV_DIRECTORY_PATH)
 
-    for file in files[0:1]:
+    for file in files:
         playlist_name = file.name
         print(f"Trying to move playlist {playlist_name}")
 
@@ -56,6 +56,11 @@ def main():
 
         dataframe = pd.read_csv(file.path)
         videos = json.loads(dataframe.to_json(orient='records'))
+
+        # Tried to use batch request, but ended up getting tons of 500 errors, no way to find what was wrong...
+        # video_ids = [video["Video Id"] for video in videos]
+        # youtube.add_videos_to_playlist(playlist_id, video_ids)
+
         for video in videos:
             video_id = video["Video Id"]
             youtube.add_video_to_playlist(playlist_id, video_id)

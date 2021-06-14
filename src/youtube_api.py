@@ -1,4 +1,5 @@
 import os
+from typing import List
 import googleapiclient
 import googleapiclient.errors
 import google_auth_oauthlib.flow
@@ -97,6 +98,45 @@ class Youtube_Api:
         except googleapiclient.errors.HttpError as e:
             print(f"Could not create playlist {playlist_name} with error: {e}")
             return None
+
+    def add_videos_to_playlist(self, playlist_id: str, video_ids: List[str], position: int = 1) -> None:
+        """Add Youtube videos to a Youtube playlist
+
+        :param playlist_id: The id of the playlist
+        :type playlist_id: str
+        :param video_ids: List of video ids to add to the playlist
+        :type video_ids: List[str]
+        :param position: The position in which the video should be placed in the playlist, defaults to 99999
+        :type position: int, optional
+        """
+        batch = self.client.new_batch_http_request()
+        for video_id in video_ids:
+            batch.add(
+                self.client.playlistItems().insert(
+                    part="snippet",
+                    body={
+                        "snippet": {
+                            "playlistId": playlist_id,
+                            "position": position,
+                            "resourceId": {
+                                "kind": "youtube#video",
+                                "videoId": video_id
+                            }
+                        }
+                    }
+                ),
+                callback=self._handle_add_videos_to_playlist
+            )
+            position = position + 1
+
+        batch.execute()
+
+    def _handle_add_videos_to_playlist(self, request_id, response, exception) -> None:
+        if exception is not None:
+            print(f"Could not move video with id {request_id} with error: {exception}")
+        else:
+            video_title = response["snippet"]["title"]
+            print(f"Successully added video with id {request_id}. The video was: {video_title}")
 
     def add_video_to_playlist(self, playlist_id: str, video_id: str, position: int = 99999) -> None:
         """Add a Youtube video to a Youtube playlist
