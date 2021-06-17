@@ -1,6 +1,9 @@
+
 # Move Youtube playlists to a new account
 
 Easy way to move Youtube playlists to a new account.
+
+> ⚠️ This is still a work in progress and should be used with caution.
 
 ## Getting Started
 
@@ -8,6 +11,12 @@ You will need OAuth credentials from [Youtube API](https://console.cloud.google.
 
 You will also need a CSV file for each playlist you wish to export. To do so, go to [Google Takeout](https://takeout.google.com/settings/takeout) and only export Youtube playlists. After that, place all CSV files into a `playlists` folder at the root of the workspace.
 
+At the end, the script will output a `report.json` file containing all the videos and their status (succes or failure) and an error message in case it failed (if the video is now private, deleted, or if the quotas limit has been reached). 
+
+## Known Issues
+
+### Only 200 videos a day
+The current quotas limit for Youtube API calls is at 10'000 per day. The problem is that a single request to add a video to a playlist costs 50, which only let us add 200 videos every day. For people with huge playlists, this can become very troublesome very quickly. The only way to deal with this right now is to run the script every day until all the videos are uploaded. We can ask Google for an increase of the quotas, but I'm not sure if they accept these easily.
 
 ## Testing
 
