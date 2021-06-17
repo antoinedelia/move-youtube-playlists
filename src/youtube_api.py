@@ -139,5 +139,5 @@ class Youtube_Api:
                 "video_id": video_id,
                 "video_tile": None,
                 "status": "Failure",
-                "error_message": e
+                "error_message": str(e)
             }

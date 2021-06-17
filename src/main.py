@@ -40,37 +40,51 @@ def main():
 
     files = get_files_from_dir(PLAYLISTS_CSV_DIRECTORY_PATH)
 
+    responses = []
+
     for file in files:
         playlist_name = file.name
+        choice = input(f"Would you like to move playlist {playlist_name}? (Y/n)")
+        if choice != "Y":
+            continue
         print(f"Trying to move playlist {playlist_name}")
 
-        # Check if playlist with this name exists. If so, delete it beforehand
-        if youtube.does_playlist_exist_by_name(playlist_name):
-            print(f"The playlist {playlist_name} already exists. Deleting it...")
-            playlist_id = youtube.get_playlist_id_by_name(playlist_name)
-            youtube.delete_playlist(playlist_id)
-            print(f"The playlist {playlist_name} has successfully been deleted!")
+        playlist_id = ""
 
-        print(f"Trying to create playlist {playlist_name}...")
-        playlist_id = youtube.create_playlist(playlist_name)
-        print(f"The playlist {playlist_name} has successfully been created!")
+        # Check if playlist with this name exists. If so, warn the user beforehand
+        if youtube.does_playlist_exist_by_name(playlist_name):
+            print(f"The playlist {playlist_name} already exists. What do you want to do?")
+            existing_playlist_choice = input("1. Delete and create new one\n2. Keep it and add new videos to it\n")
+            if existing_playlist_choice == "1":
+                playlist_id = youtube.get_playlist_id_by_name(playlist_name)
+                youtube.delete_playlist(playlist_id)
+                print(f"The playlist {playlist_name} has successfully been deleted!")
+
+                print(f"Trying to create playlist {playlist_name}...")
+                playlist_id = youtube.create_playlist(playlist_name)
+                print(f"The playlist {playlist_name} has successfully been created!")
+            elif existing_playlist_choice == "2":
+                playlist_id = youtube.get_playlist_id_by_name(playlist_name)
+            else:
+                print("Could not understand your response. Exiting...")
+                exit()
 
         dataframe = pd.read_csv(file.path)
         videos = json.loads(dataframe.to_json(orient='records'))
 
-        responses = []
         for video in videos:
             video_id = video["Video Id"]
+            # TODO Check if video with this id already exists to avoid making duplicates and save API calls
             response = youtube.add_video_to_playlist(playlist_id, video_id)
-            responses.add(response)
+            responses.append(response)
 
-        number_of_failures = len([response for response in responses if response["status"] == "Failure"])
-        number_of_success = len(responses) - number_of_failures
-        print(f"There have been {number_of_success}/{len(responses)} success responses.")
-        if number_of_failures > 0:
-            print(f"You can view a detailed report of what errors occured in the report file {REPORT_FILE}.")
-            with open(REPORT_FILE, 'w', encoding='utf-8') as f:
-                json.dump(responses, f, ensure_ascii=False, indent=4)
+    number_of_failures = len([response for response in responses if response["status"] == "Failure"])
+    number_of_success = len(responses) - number_of_failures
+    print(f"There have been {number_of_success}/{len(responses)} success responses.")
+    if number_of_failures > 0:
+        print(f"You can view a detailed report of what errors occured in the report file {REPORT_FILE}.")
+        with open(REPORT_FILE, 'w+', encoding='utf-8') as f:
+            json.dump(responses, f, ensure_ascii=False, indent=4)
 
 
 if __name__ == "__main__":
