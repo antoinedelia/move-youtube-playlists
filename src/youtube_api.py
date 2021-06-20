@@ -141,3 +141,38 @@ class Youtube_Api:
                 "status": "Failure",
                 "error_message": str(e)
             }
+
+    def get_videos_in_playlist(self, playlist_id: str) -> list:
+        """Get all the videos from a playlist
+
+        :param playlist_id: The id of the playlist
+        :type playlist_id: str
+        :return: A list of all the videos present in the playlist
+        :rtype: list
+        """
+        request = self.client.playlistItems().list(
+            part="snippet",
+            playlistId=playlist_id
+        )
+
+        try:
+            response = request.execute()
+            print(f"Successully got videos from playlist with id {playlist_id}")
+            return response["items"]
+        except googleapiclient.errors.HttpError as e:
+            print(f"Could not list videos in playlist with id {playlist_id} with error: {e}")
+            return []
+
+    def does_video_exists_in_playlist(self, video_id: str, playlist_id: str) -> bool:
+        """Check if a video exists in a playlist
+
+        :param video_id: The id of the video
+        :type video_id: str
+        :param playlist_id: The id of the playlist
+        :type playlist_id: str
+        :return: Whether the video is in the playlist or not
+        :rtype: bool
+        """
+        videos_in_playlist = self.get_videos_in_playlist(playlist_id)
+        videos_ids = [video["id"] for video in videos_in_playlist]
+        return video_id in videos_ids

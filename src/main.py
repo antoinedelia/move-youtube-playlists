@@ -68,15 +68,31 @@ def main():
             else:
                 print("Could not understand your response. Exiting...")
                 exit()
+        else:
+            print(f"Trying to create playlist {playlist_name}...")
+            playlist_id = youtube.create_playlist(playlist_name)
+            print(f"The playlist {playlist_name} has successfully been created!")
 
         dataframe = pd.read_csv(file.path)
         videos = json.loads(dataframe.to_json(orient='records'))
 
+        # Retrieving the ids once at the beginning to make only one API call instead of checking each time
+        videos_in_playlist = youtube.get_videos_in_playlist(playlist_id)
+        videos_in_playlist_ids = [video["id"] for video in videos_in_playlist]
+
         for video in videos:
             video_id = video["Video Id"]
-            # TODO Check if video with this id already exists to avoid making duplicates and save API calls
-            response = youtube.add_video_to_playlist(playlist_id, video_id)
-            responses.append(response)
+            if video_id in videos_in_playlist_ids:
+                print(f"The video with id {video_id} already exists in the playlist with id {playlist_id}.")
+                responses.append({
+                    "video_id": video_id,
+                    "video_tile": None,
+                    "status": "Failure",
+                    "error_message": "The video already exists in playlist"
+                })
+            else:
+                response = youtube.add_video_to_playlist(playlist_id, video_id)
+                responses.append(response)
 
     number_of_failures = len([response for response in responses if response["status"] == "Failure"])
     number_of_success = len(responses) - number_of_failures

@@ -3,3 +3,4 @@ client_secret.json
 playlists/
 .pytest_cache/
 __pycache__
+report.json
