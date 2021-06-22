@@ -150,18 +150,30 @@ class Youtube_Api:
         :return: A list of all the videos present in the playlist
         :rtype: list
         """
-        request = self.client.playlistItems().list(
-            part="snippet",
-            playlistId=playlist_id
-        )
+        videos = []
+        next_page_token = ""
 
-        try:
-            response = request.execute()
-            print(f"Successully got videos from playlist with id {playlist_id}")
-            return response["items"]
-        except googleapiclient.errors.HttpError as e:
-            print(f"Could not list videos in playlist with id {playlist_id} with error: {e}")
-            return []
+        # We can only retrieve 50 items at a time, so we use pagination to get all results
+        while True:
+            request = self.client.playlistItems().list(
+                part="snippet",
+                maxResults=50,
+                pageToken=next_page_token,
+                playlistId=playlist_id
+            )
+
+            try:
+                response = request.execute()
+                items = [video["snippet"] for video in response["items"]]
+                videos.extend(items)
+                number_of_videos = response["pageInfo"]["totalResults"]
+                if len(videos) >= number_of_videos:
+                    print(f"Successully got videos from playlist with id {playlist_id}! Number of videos found: {len(videos)}.")
+                    return videos
+                next_page_token = response["nextPageToken"]
+            except googleapiclient.errors.HttpError as e:
+                print(f"Could not list videos in playlist with id {playlist_id} with error: {e}")
+                return videos
 
     def does_video_exists_in_playlist(self, video_id: str, playlist_id: str) -> bool:
         """Check if a video exists in a playlist

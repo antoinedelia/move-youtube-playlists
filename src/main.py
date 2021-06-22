@@ -74,19 +74,23 @@ def main():
             print(f"The playlist {playlist_name} has successfully been created!")
 
         dataframe = pd.read_csv(file.path)
-        videos = json.loads(dataframe.to_json(orient='records'))
+        videos_from_old_playlist = json.loads(dataframe.to_json(orient='records'))
 
         # Retrieving the ids once at the beginning to make only one API call instead of checking each time
         videos_in_playlist = youtube.get_videos_in_playlist(playlist_id)
-        videos_in_playlist_ids = [video["id"] for video in videos_in_playlist]
+        existing_videos = {}
+        for video in videos_in_playlist:
+            video_id = video["resourceId"]["videoId"]
+            video_title = video["title"]
+            existing_videos[video_id] = video_title
 
-        for video in videos:
+        for video in videos_from_old_playlist:
             video_id = video["Video Id"]
-            if video_id in videos_in_playlist_ids:
-                print(f"The video with id {video_id} already exists in the playlist with id {playlist_id}.")
+            if video_id in existing_videos:
+                print(f"The video {existing_videos[video_id]} already exists in the playlist {playlist_name}.")
                 responses.append({
                     "video_id": video_id,
-                    "video_tile": None,
+                    "video_tile": existing_videos[video_id],
                     "status": "Failure",
                     "error_message": "The video already exists in playlist"
                 })

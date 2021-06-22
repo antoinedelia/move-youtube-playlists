@@ -7,9 +7,16 @@ Easy way to move Youtube playlists to a new account.
 
 ## Getting Started
 
+
 You will need OAuth credentials from [Youtube API](https://console.cloud.google.com/apis/api/youtube.googleapis.com). You can (and should) download the credcentials directly from the console and place the `client_secret.json` file at the root of the workspace. You can find more info on the [Official Python Quickstart](https://developers.google.com/youtube/v3/quickstart/python).
 
-You will also need a CSV file for each playlist you wish to export. To do so, go to [Google Takeout](https://takeout.google.com/settings/takeout) and only export Youtube playlists. After that, place all CSV files into a `playlists` folder at the root of the workspace.
+You will also need a CSV file for each playlist you wish to export. To do so, go to [Google Takeout](https://takeout.google.com/settings/takeout) and only export Youtube playlists. After that, place all CSV files into a `playlists` folder at the root of the workspace. You should also delete the top 3 lines, as they will crash the application.
+
+Once everything is setup, simply run the script with the following command:
+
+```bash
+$ python src/main.py
+```
 
 At the end, the script will output a `report.json` file containing all the videos and their status (succes or failure) and an error message in case it failed (if the video is now private, deleted, or if the quotas limit has been reached). 
 
